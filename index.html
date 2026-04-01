@@ -35,27 +35,6 @@
             font-size: 12px;
         }
         
-        #startBtn {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1a3a5f;
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 40px;
-            font-size: 18px;
-            font-weight: bold;
-            z-index: 200;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        
-        #startBtn:active {
-            transform: translateX(-50%) scale(0.95);
-        }
-        
         .quiz-panel {
             position: absolute;
             bottom: 100px;
@@ -149,7 +128,6 @@
         @media (max-width: 600px) {
             .quiz-question { font-size: 16px; }
             .quiz-option { padding: 10px; font-size: 14px; }
-            #startBtn { padding: 12px 24px; font-size: 16px; }
         }
     </style>
 </head>
@@ -159,12 +137,11 @@
         請稍候
     </div>
     
-    <button id="startBtn">🎯 開始 AR 體驗</button>
     <button id="quizTrigger">📝 挑戰測驗</button>
     
     <div id="info">
         <h2>🏛️ AR 香港古蹟遊</h2>
-        <p>點擊「開始 AR 體驗」按鈕</p>
+        <p>將相機對準標記圖片</p>
     </div>
     
     <div id="quizPanel" class="quiz-panel">
@@ -174,7 +151,7 @@
         <div id="quizResult" class="quiz-result"></div>
     </div>
     
-    <!-- 使用最新穩定版 AR.js -->
+    <!-- AR.js -->
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ar.js@2.2.2/aframe/build/aframe-ar.js"></script>
     
@@ -182,9 +159,7 @@
              embedded 
              arjs="sourceType: webcam; 
                     debugUIEnabled: false; 
-                    detectionMode: mono_and_matrix;
-                    canvasWidth: 640;
-                    canvasHeight: 480;">
+                    detectionMode: mono_and_matrix;">
         
         <!-- 尖沙咀鐘樓 -->
         <a-marker id="marker-clocktower" type="pattern" url="assets/clock_tower.patt">
@@ -255,49 +230,12 @@
         };
         
         let currentTarget = null;
-        let arStarted = false;
         
         // 隱藏載入提示
         setTimeout(() => {
             const loading = document.getElementById('loading');
             if (loading) loading.style.display = 'none';
         }, 2000);
-        
-        const sceneEl = document.getElementById('arScene');
-        
-        // 監聽 AR 系統就緒
-        sceneEl.addEventListener('arjs-ready', () => {
-            console.log('AR.js 已就緒');
-            document.getElementById('startBtn').disabled = false;
-            document.getElementById('startBtn').textContent = '🎯 開始 AR 體驗';
-        });
-        
-        // 開始按鈕
-        document.getElementById('startBtn').addEventListener('click', async () => {
-            if (arStarted) return;
-            
-            try {
-                // 先請求相機權限
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                stream.getTracks().forEach(track => track.stop());
-                
-                // 啟動 AR
-                if (sceneEl.components && sceneEl.components['arjs']) {
-                    sceneEl.components['arjs'].start();
-                    arStarted = true;
-                    document.getElementById('startBtn').style.display = 'none';
-                    document.getElementById('info').innerHTML = `
-                        <h2>🏛️ AR 香港古蹟遊</h2>
-                        <p>將相機對準標記圖片</p>
-                    `;
-                } else {
-                    throw new Error('arjs component not found');
-                }
-            } catch (error) {
-                console.error('啟動錯誤:', error);
-                alert('無法啟動 AR，請檢查相機權限後重新整理頁面');
-            }
-        });
         
         // 標記識別事件
         const markers = [
@@ -311,7 +249,6 @@
             if (!marker) return;
             
             marker.addEventListener('markerFound', () => {
-                if (!arStarted) return;
                 currentTarget = m.key;
                 const data = heritageData[m.key];
                 document.getElementById('info').innerHTML = `
@@ -322,7 +259,6 @@
             });
             
             marker.addEventListener('markerLost', () => {
-                if (!arStarted) return;
                 document.getElementById('info').innerHTML = `
                     <h2>🏛️ AR 香港古蹟遊</h2>
                     <p>將相機對準標記圖片</p>
@@ -381,11 +317,6 @@
         
         document.getElementById('quizTrigger').addEventListener('click', showQuiz);
         document.getElementById('closeQuizBtn').addEventListener('click', closeQuiz);
-        
-        // 檢查瀏覽器支援
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            alert('您的瀏覽器不支援相機存取，請使用 Chrome 或 Safari');
-        }
     </script>
 </body>
 </html>
