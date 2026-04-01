@@ -183,7 +183,7 @@
     <!-- 資訊面板 -->
     <div id="info">
         <h2>🏛️ AR 香港古蹟遊</h2>
-        <p>將相機對準標記圖片</p>
+        <p>點擊「開始 AR 體驗」按鈕</p>
     </div>
     
     <!-- 測驗面板 -->
@@ -198,8 +198,8 @@
     <script src="https://cdn.jsdelivr.net/npm/aframe@1.3.0/dist/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-ar@3.0.0/dist/aframe-ar.min.js"></script>
     
-    <!-- AR 場景 -->
-    <a-scene id="arScene" embedded arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix;">
+    <!-- AR 場景（初始不自動啟動相機） -->
+    <a-scene id="arScene" embedded arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; autoStart: false;">
         
         <!-- 尖沙咀鐘樓標記 -->
         <a-marker id="marker-clocktower" type="pattern" url="assets/clock_tower.patt" racastable="true">
@@ -275,67 +275,93 @@
         
         let currentTarget = null;
         let sceneReady = false;
+        let arStarted = false;
         
         // 隱藏加載提示
         setTimeout(() => {
             document.getElementById('loading').style.display = 'none';
-        }, 2000);
+        }, 1500);
+        
+        // 等待 AR 場景加載完成
+        const sceneEl = document.getElementById('arScene');
+        
+        sceneEl.addEventListener('loaded', () => {
+            console.log('AR 場景已加載完成');
+            sceneReady = true;
+            document.getElementById('info').innerHTML = `
+                <h2>🏛️ AR 香港古蹟遊</h2>
+                <p>點擊「開始 AR 體驗」按鈕</p>
+            `;
+        });
         
         // 開始按鈕：手動啟動 AR
         document.getElementById('startBtn').addEventListener('click', () => {
-            const scene = document.getElementById('arScene');
-            if (scene && scene.components && scene.components['arjs']) {
-                scene.components['arjs'].start();
-                document.getElementById('startBtn').style.display = 'none';
-                document.getElementById('info').innerHTML = `
-                    <h2>🏛️ AR 香港古蹟遊</h2>
-                    <p>將相機對準標記圖片</p>
-                `;
-            } else {
-                alert('無法啟動 AR，請重新整理頁面');
+            if (!sceneReady) {
+                alert('AR 場景尚未載入完成，請稍後再試');
+                return;
             }
-        });
-        
-        // AR 場景加載完成後
-        const scene = document.getElementById('arScene');
-        scene.addEventListener('loaded', () => {
-            console.log('AR 場景已加載');
-            sceneReady = true;
             
-            // 監聽所有標記的識別事件
-            const markers = ['marker-clocktower', 'marker-wocheung', 'marker-bluehouse'];
+            if (arStarted) {
+                return;
+            }
             
-            markers.forEach(markerId => {
-                const marker = document.getElementById(markerId);
-                if (!marker) return;
-                
-                marker.addEventListener('markerFound', () => {
-                    let targetKey = '';
-                    if (markerId === 'marker-clocktower') targetKey = 'clock_tower';
-                    else if (markerId === 'marker-wocheung') targetKey = 'wo_cheung';
-                    else if (markerId === 'marker-bluehouse') targetKey = 'blue_house';
-                    
-                    if (targetKey) {
-                        currentTarget = targetKey;
-                        const data = heritageData[targetKey];
-                        document.getElementById('info').innerHTML = `
-                            <h2>🏛️ ${data.name} (${data.nameEn})</h2>
-                            <p>${data.history}</p>
-                        `;
-                        // 顯示測驗按鈕
-                        document.getElementById('quizTrigger').style.display = 'block';
-                    }
-                });
-                
-                marker.addEventListener('markerLost', () => {
+            try {
+                // 啟動 AR 系統
+                if (sceneEl.components && sceneEl.components['arjs']) {
+                    sceneEl.components['arjs'].start();
+                    arStarted = true;
+                    document.getElementById('startBtn').style.display = 'none';
                     document.getElementById('info').innerHTML = `
                         <h2>🏛️ AR 香港古蹟遊</h2>
                         <p>將相機對準標記圖片</p>
                     `;
-                    document.getElementById('quizTrigger').style.display = 'none';
-                    closeQuiz();
-                    currentTarget = null;
-                });
+                    console.log('AR 已成功啟動');
+                } else {
+                    console.error('arjs 組件未找到');
+                    alert('無法啟動 AR，請重新整理頁面');
+                }
+            } catch (error) {
+                console.error('啟動 AR 時出錯:', error);
+                alert('無法啟動 AR，請重新整理頁面');
+            }
+        });
+        
+        // 監聽所有標記的識別事件（在 AR 啟動後才會觸發）
+        const markers = ['marker-clocktower', 'marker-wocheung', 'marker-bluehouse'];
+        
+        markers.forEach(markerId => {
+            const marker = document.getElementById(markerId);
+            if (!marker) return;
+            
+            marker.addEventListener('markerFound', () => {
+                if (!arStarted) return;
+                
+                let targetKey = '';
+                if (markerId === 'marker-clocktower') targetKey = 'clock_tower';
+                else if (markerId === 'marker-wocheung') targetKey = 'wo_cheung';
+                else if (markerId === 'marker-bluehouse') targetKey = 'blue_house';
+                
+                if (targetKey) {
+                    currentTarget = targetKey;
+                    const data = heritageData[targetKey];
+                    document.getElementById('info').innerHTML = `
+                        <h2>🏛️ ${data.name} (${data.nameEn})</h2>
+                        <p>${data.history}</p>
+                    `;
+                    document.getElementById('quizTrigger').style.display = 'block';
+                }
+            });
+            
+            marker.addEventListener('markerLost', () => {
+                if (!arStarted) return;
+                
+                document.getElementById('info').innerHTML = `
+                    <h2>🏛️ AR 香港古蹟遊</h2>
+                    <p>將相機對準標記圖片</p>
+                `;
+                document.getElementById('quizTrigger').style.display = 'none';
+                closeQuiz();
+                currentTarget = null;
             });
         });
         
@@ -385,7 +411,6 @@
                 resultDiv.style.color = '#ff6b6b';
             }
             
-            // 3秒後自動關閉
             setTimeout(() => {
                 closeQuiz();
             }, 3000);
@@ -395,11 +420,12 @@
         document.getElementById('quizTrigger').addEventListener('click', showQuiz);
         document.getElementById('closeQuizBtn').addEventListener('click', closeQuiz);
         
-        // 兼容沒有相機權限時顯示提示
+        // 檢查相機權限
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             navigator.mediaDevices.getUserMedia({ video: true })
-                .then(() => {
+                .then((stream) => {
                     console.log('相機權限已獲取');
+                    stream.getTracks().forEach(track => track.stop());
                 })
                 .catch((err) => {
                     console.error('相機權限被拒絕:', err);
