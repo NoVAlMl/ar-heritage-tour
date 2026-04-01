@@ -5,180 +5,387 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>AR 香港古蹟遊</title>
     <style>
-        body { margin: 0; overflow: hidden; font-family: Arial, 'Microsoft JhengHei', sans-serif; }
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Arial', 'Microsoft JhengHei', sans-serif;
+        }
+        
         #info {
-            position: absolute; top: 20px; left: 0; right: 0; text-align: center;
-            color: white; background: rgba(0,0,0,0.7); padding: 12px;
-            z-index: 100; pointer-events: none; backdrop-filter: blur(5px);
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: white;
+            background: rgba(0,0,0,0.75);
+            padding: 12px;
+            z-index: 100;
+            pointer-events: none;
+            backdrop-filter: blur(5px);
         }
-        #info h2 { margin: 0 0 5px; font-size: 18px; }
-        #info p { margin: 0; font-size: 12px; }
+        
+        #info h2 {
+            margin: 0 0 5px 0;
+            font-size: 18px;
+        }
+        
+        #info p {
+            margin: 0;
+            font-size: 12px;
+        }
+        
         #startBtn {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            background: #1a3a5f; color: white; border: none; padding: 14px 28px;
-            border-radius: 40px; font-size: 18px; font-weight: bold; z-index: 200;
-            cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a3a5f;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 40px;
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 200;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        #startBtn:active { transform: translateX(-50%) scale(0.95); }
+        
+        #startBtn:active {
+            transform: translateX(-50%) scale(0.95);
+        }
+        
         .quiz-panel {
-            position: absolute; bottom: 100px; left: 20px; right: 20px;
-            background: rgba(0,0,0,0.95); color: white; padding: 20px; border-radius: 20px;
-            z-index: 300; display: none; backdrop-filter: blur(10px);
+            position: absolute;
+            bottom: 100px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.95);
+            color: white;
+            padding: 20px;
+            border-radius: 20px;
+            z-index: 300;
+            display: none;
+            backdrop-filter: blur(10px);
             border: 1px solid #c6a43f;
         }
-        .quiz-panel.show { display: block; }
-        .quiz-question { font-size: 18px; margin-bottom: 20px; text-align: center; font-weight: bold; color: #c6a43f; }
-        .quiz-option { background: #2a2a2a; padding: 12px; margin: 10px 0; border-radius: 12px; cursor: pointer; text-align: center; }
-        .quiz-option:hover { background: #c6a43f; color: #1a3a5f; }
-        .close-quiz { float: right; background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
-        .quiz-result { margin-top: 15px; text-align: center; }
-        #quizTrigger {
-            position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%);
-            background: #c6a43f; color: #1a3a5f; border: none; padding: 12px 24px;
-            border-radius: 40px; font-size: 16px; font-weight: bold; z-index: 150;
-            cursor: pointer; display: none; box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        
+        .quiz-panel.show {
+            display: block;
         }
+        
+        .quiz-question {
+            font-size: 18px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: #c6a43f;
+        }
+        
+        .quiz-option {
+            background: #2a2a2a;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        
+        .quiz-option:hover {
+            background: #c6a43f;
+            color: #1a3a5f;
+        }
+        
+        .close-quiz {
+            float: right;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .quiz-result {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 16px;
+        }
+        
+        #quizTrigger {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #c6a43f;
+            color: #1a3a5f;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 150;
+            cursor: pointer;
+            display: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
         #loading {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-            color: white; background: rgba(0,0,0,0.8); padding: 15px 25px;
-            border-radius: 30px; z-index: 400; font-size: 14px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            background: rgba(0,0,0,0.8);
+            padding: 15px 25px;
+            border-radius: 30px;
+            z-index: 400;
+            font-size: 14px;
+            text-align: center;
+            z-index: 500;
+        }
+        
+        @media (max-width: 600px) {
+            .quiz-question { font-size: 16px; }
+            .quiz-option { padding: 10px; font-size: 14px; }
+            #startBtn { padding: 12px 24px; font-size: 16px; }
         }
     </style>
 </head>
 <body>
-    <div id="loading">⏳ 載入中，請稍候...</div>
+    <div id="loading">
+        ⏳ 載入中...<br>
+        請稍候
+    </div>
+    
     <button id="startBtn">🎯 開始 AR 體驗</button>
     <button id="quizTrigger">📝 挑戰測驗</button>
-    <div id="info"><h2>🏛️ AR 香港古蹟遊</h2><p>點擊「開始 AR 體驗」</p></div>
+    
+    <div id="info">
+        <h2>🏛️ AR 香港古蹟遊</h2>
+        <p>點擊「開始 AR 體驗」按鈕</p>
+    </div>
+    
     <div id="quizPanel" class="quiz-panel">
         <button class="close-quiz" id="closeQuizBtn">✕</button>
         <div id="quizQuestion" class="quiz-question"></div>
         <div id="quizOptions"></div>
         <div id="quizResult" class="quiz-result"></div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/aframe@1.3.0/dist/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-ar@3.0.0/dist/aframe-ar.min.js"></script>
-
-    <a-scene id="arScene" embedded arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix;">
+    
+    <!-- 使用最新穩定版 AR.js -->
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ar.js@2.2.2/aframe/build/aframe-ar.js"></script>
+    
+    <a-scene id="arScene" 
+             embedded 
+             arjs="sourceType: webcam; 
+                    debugUIEnabled: false; 
+                    detectionMode: mono_and_matrix;
+                    canvasWidth: 640;
+                    canvasHeight: 480;">
+        
+        <!-- 尖沙咀鐘樓 -->
         <a-marker id="marker-clocktower" type="pattern" url="assets/clock_tower.patt">
-            <a-entity gltf-model="url(assets/clock_tower.glb)" scale="0.5 0.5 0.5" position="0 0 0"
-                animation="property: rotation; to: 0 360 0; loop: true; dur: 15000;"></a-entity>
+            <a-entity 
+                gltf-model="url(assets/clock_tower.glb)" 
+                scale="0.5 0.5 0.5" 
+                position="0 0 0"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 15000;">
+            </a-entity>
         </a-marker>
+        
+        <!-- 和昌大押 -->
         <a-marker id="marker-wocheung" type="pattern" url="assets/wo_cheung.patt">
-            <a-entity gltf-model="url(assets/wo_cheung.glb)" scale="0.5 0.5 0.5" position="0 0 0"
-                animation="property: rotation; to: 0 360 0; loop: true; dur: 15000;"></a-entity>
+            <a-entity 
+                gltf-model="url(assets/wo_cheung.glb)" 
+                scale="0.5 0.5 0.5" 
+                position="0 0 0"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 15000;">
+            </a-entity>
         </a-marker>
+        
+        <!-- 藍屋 -->
         <a-marker id="marker-bluehouse" type="pattern" url="assets/blue_house.patt">
-            <a-entity gltf-model="url(assets/blue_house.glb)" scale="0.5 0.5 0.5" position="0 0 0"
-                animation="property: rotation; to: 0 360 0; loop: true; dur: 15000;"></a-entity>
+            <a-entity 
+                gltf-model="url(assets/blue_house.glb)" 
+                scale="0.5 0.5 0.5" 
+                position="0 0 0"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 15000;">
+            </a-entity>
         </a-marker>
+        
         <a-entity camera></a-entity>
     </a-scene>
-
+    
     <script>
+        // 古蹟資料
         const heritageData = {
-            clock_tower: { name:'尖沙咀鐘樓', nameEn:'Clock Tower', history:'九廣鐵路尖沙咀站鐘樓，1916年啟用',
-                quiz:{ question:'尖沙咀鐘樓係邊一年啟用？', options:['1915年','1916年','1920年','1921年'], correct:1 } },
-            wo_cheung: { name:'和昌大押', nameEn:'Wo Cheung', history:'灣仔和昌大押，戰前唐樓建築',
-                quiz:{ question:'和昌大押位於香港邊區？', options:['中環','灣仔','尖沙咀','旺角'], correct:1 } },
-            blue_house: { name:'藍屋', nameEn:'Blue House', history:'灣仔藍屋，一級歷史建築',
-                quiz:{ question:'藍屋建築群以咩顏色聞名？', options:['紅色','綠色','藍色','黃色'], correct:2 } }
+            clock_tower: {
+                name: '尖沙咀鐘樓',
+                nameEn: 'Tsim Sha Tsui Clock Tower',
+                history: '九廣鐵路尖沙咀站鐘樓，1916年啟用，香港法定古蹟',
+                quiz: {
+                    question: '尖沙咀鐘樓係邊一年啟用？',
+                    options: ['1915年', '1916年', '1920年', '1921年'],
+                    correct: 1
+                }
+            },
+            wo_cheung: {
+                name: '和昌大押',
+                nameEn: 'Wo Cheung Pawn Shop',
+                history: '灣仔和昌大押，戰前唐樓建築，香港歷史建築',
+                quiz: {
+                    question: '和昌大押位於香港邊區？',
+                    options: ['中環', '灣仔', '尖沙咀', '旺角'],
+                    correct: 1
+                }
+            },
+            blue_house: {
+                name: '藍屋',
+                nameEn: 'Blue House',
+                history: '灣仔藍屋，香港一級歷史建築，活化成民間生活館',
+                quiz: {
+                    question: '藍屋建築群以咩顏色聞名？',
+                    options: ['紅色', '綠色', '藍色', '黃色'],
+                    correct: 2
+                }
+            }
         };
-
+        
         let currentTarget = null;
         let arStarted = false;
-
-        // 隱藏載入中
-        setTimeout(() => { const el = document.getElementById('loading'); if(el) el.style.display = 'none'; }, 1500);
-
-        const scene = document.getElementById('arScene');
-
-        // ✅ 直接用 AR.js 的相機事件，不再依賴 scene.hasLoaded
-        scene.addEventListener('camera-init', () => {
-            console.log('✅ AR.js 相機已初始化');
+        
+        // 隱藏載入提示
+        setTimeout(() => {
+            const loading = document.getElementById('loading');
+            if (loading) loading.style.display = 'none';
+        }, 2000);
+        
+        const sceneEl = document.getElementById('arScene');
+        
+        // 監聽 AR 系統就緒
+        sceneEl.addEventListener('arjs-ready', () => {
+            console.log('AR.js 已就緒');
             document.getElementById('startBtn').disabled = false;
             document.getElementById('startBtn').textContent = '🎯 開始 AR 體驗';
-            document.getElementById('info').innerHTML = '<h2>🏛️ AR 香港古蹟遊</h2><p>點擊「開始 AR 體驗」</p>';
         });
-
-        scene.addEventListener('camera-error', (err) => {
-            console.error('相機錯誤:', err);
-            document.getElementById('info').innerHTML = '<h2>⚠️ 無法存取相機</h2><p>請檢查權限後重新整理</p>';
-        });
-
+        
         // 開始按鈕
-        document.getElementById('startBtn').addEventListener('click', () => {
+        document.getElementById('startBtn').addEventListener('click', async () => {
             if (arStarted) return;
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(() => {
-                    if (scene.components && scene.components['arjs']) {
-                        scene.components['arjs'].start();
-                        arStarted = true;
-                        document.getElementById('startBtn').style.display = 'none';
-                        document.getElementById('info').innerHTML = '<h2>🏛️ AR 香港古蹟遊</h2><p>將相機對準標記圖片</p>';
-                    } else {
-                        alert('無法啟動 AR，請重新整理頁面');
-                    }
-                })
-                .catch(() => alert('無法存取相機，請檢查權限'));
+            
+            try {
+                // 先請求相機權限
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                stream.getTracks().forEach(track => track.stop());
+                
+                // 啟動 AR
+                if (sceneEl.components && sceneEl.components['arjs']) {
+                    sceneEl.components['arjs'].start();
+                    arStarted = true;
+                    document.getElementById('startBtn').style.display = 'none';
+                    document.getElementById('info').innerHTML = `
+                        <h2>🏛️ AR 香港古蹟遊</h2>
+                        <p>將相機對準標記圖片</p>
+                    `;
+                } else {
+                    throw new Error('arjs component not found');
+                }
+            } catch (error) {
+                console.error('啟動錯誤:', error);
+                alert('無法啟動 AR，請檢查相機權限後重新整理頁面');
+            }
         });
-
-        // 標記事件
-        ['marker-clocktower','marker-wocheung','marker-bluehouse'].forEach(mid => {
-            const m = document.getElementById(mid);
-            if(!m) return;
-            m.addEventListener('markerFound', () => {
-                if(!arStarted) return;
-                let key = mid === 'marker-clocktower' ? 'clock_tower' : mid === 'marker-wocheung' ? 'wo_cheung' : 'blue_house';
-                currentTarget = key;
-                const d = heritageData[key];
-                document.getElementById('info').innerHTML = `<h2>🏛️ ${d.name} (${d.nameEn})</h2><p>${d.history}</p>`;
+        
+        // 標記識別事件
+        const markers = [
+            { id: 'marker-clocktower', key: 'clock_tower' },
+            { id: 'marker-wocheung', key: 'wo_cheung' },
+            { id: 'marker-bluehouse', key: 'blue_house' }
+        ];
+        
+        markers.forEach(m => {
+            const marker = document.getElementById(m.id);
+            if (!marker) return;
+            
+            marker.addEventListener('markerFound', () => {
+                if (!arStarted) return;
+                currentTarget = m.key;
+                const data = heritageData[m.key];
+                document.getElementById('info').innerHTML = `
+                    <h2>🏛️ ${data.name} (${data.nameEn})</h2>
+                    <p>${data.history}</p>
+                `;
                 document.getElementById('quizTrigger').style.display = 'block';
             });
-            m.addEventListener('markerLost', () => {
-                if(!arStarted) return;
-                document.getElementById('info').innerHTML = '<h2>🏛️ AR 香港古蹟遊</h2><p>將相機對準標記圖片</p>';
+            
+            marker.addEventListener('markerLost', () => {
+                if (!arStarted) return;
+                document.getElementById('info').innerHTML = `
+                    <h2>🏛️ AR 香港古蹟遊</h2>
+                    <p>將相機對準標記圖片</p>
+                `;
                 document.getElementById('quizTrigger').style.display = 'none';
                 document.getElementById('quizPanel').classList.remove('show');
                 currentTarget = null;
             });
         });
-
+        
+        // 測驗功能
         function showQuiz() {
-            if(!currentTarget) { alert('請先掃描一個古蹟標記！'); return; }
-            const q = heritageData[currentTarget].quiz;
-            document.getElementById('quizQuestion').innerText = q.question;
-            const optsDiv = document.getElementById('quizOptions');
-            optsDiv.innerHTML = '';
-            q.options.forEach((opt, idx) => {
-                const div = document.createElement('div');
-                div.className = 'quiz-option';
-                div.innerText = opt;
-                div.onclick = () => {
-                    const resultDiv = document.getElementById('quizResult');
-                    if(idx === q.correct) {
-                        resultDiv.innerHTML = '✅ 答對了！你真係了解香港歷史！';
-                        resultDiv.style.color = '#4caf50';
-                    } else {
-                        resultDiv.innerHTML = `❌ 答錯了！正確答案是：${q.options[q.correct]}`;
-                        resultDiv.style.color = '#ff6b6b';
-                    }
-                    setTimeout(() => {
-                        document.getElementById('quizPanel').classList.remove('show');
-                        resultDiv.innerHTML = '';
-                    }, 3000);
-                };
-                optsDiv.appendChild(div);
+            if (!currentTarget) {
+                alert('請先掃描一個古蹟標記！');
+                return;
+            }
+            
+            const data = heritageData[currentTarget];
+            const quiz = data.quiz;
+            document.getElementById('quizQuestion').textContent = quiz.question;
+            
+            const optionsDiv = document.getElementById('quizOptions');
+            optionsDiv.innerHTML = '';
+            
+            quiz.options.forEach((opt, idx) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'quiz-option';
+                optionDiv.textContent = opt;
+                optionDiv.onclick = () => checkAnswer(idx, quiz.correct);
+                optionsDiv.appendChild(optionDiv);
             });
+            
+            document.getElementById('quizResult').innerHTML = '';
             document.getElementById('quizPanel').classList.add('show');
         }
-
-        document.getElementById('quizTrigger').onclick = showQuiz;
-        document.getElementById('closeQuizBtn').onclick = () => {
+        
+        function closeQuiz() {
             document.getElementById('quizPanel').classList.remove('show');
             document.getElementById('quizResult').innerHTML = '';
-        };
+        }
+        
+        function checkAnswer(selected, correct) {
+            const resultDiv = document.getElementById('quizResult');
+            const data = heritageData[currentTarget];
+            
+            if (selected === correct) {
+                resultDiv.innerHTML = '✅ 答對了！你真係了解香港歷史！';
+                resultDiv.style.color = '#4caf50';
+            } else {
+                resultDiv.innerHTML = `❌ 答錯了！正確答案是：${data.quiz.options[correct]}`;
+                resultDiv.style.color = '#ff6b6b';
+            }
+            
+            setTimeout(closeQuiz, 3000);
+        }
+        
+        document.getElementById('quizTrigger').addEventListener('click', showQuiz);
+        document.getElementById('closeQuizBtn').addEventListener('click', closeQuiz);
+        
+        // 檢查瀏覽器支援
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert('您的瀏覽器不支援相機存取，請使用 Chrome 或 Safari');
+        }
     </script>
 </body>
 </html>
